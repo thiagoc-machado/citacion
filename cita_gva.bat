@@ -1,0 +1,1 @@
+python cita_gva.py -d y8497997v -n Thiago -a1 Carvalho -a2 Machado -f 17/04/1982 -o cita.pdf -p València/Valencia -m Valencia -s JURAMENTO

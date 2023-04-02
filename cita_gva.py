@@ -13,13 +13,16 @@ import logging
 import argparse
 import sys
 from strenum import StrEnum
+import os, ssl
 
+ssl._create_default_https_context = ssl._create_unverified_context
+# os.environ['REQUESTS_CA_BUNDLE'] = 'cert.pem'
 # Reuse connections
-client = requests.Session()
+client = requests.Session(verify=False)
 
 
 # https://www.tramita.gva.es/ctt-att-atr/asistente/iniciarTramite.html?tramite=CITA_PREVIA&version=2&idioma=es&idProcGuc=14104&idCatGuc=PR
-
+# https://sedejudicial.gva.es/
 
 class APIconst(StrEnum):
     PROVINCIA = 'SOL_PROV'
@@ -88,6 +91,7 @@ class APIobject:
                         validar = template_request(
                             "https://www.tramita.gva.es/ctt-att-atr/asistente/fm/evaluarCambioCampo.html",
                             verb='POST',
+                            verify=False,
                             validate_API=True,
                             extraHeaders={
                                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -168,7 +172,7 @@ class APIobject:
         return export
 
 
-def template_request(url, verb='GET', extraHeaders={}, validate_API=False, data=None):
+def template_request(url, verb='GET', extraHeaders={}, validate_API=False, data=None, verify=False):
     basic_headers = {
         "Accept": "*/*; q=0.01",
         "Connection": "keep-alive",
@@ -182,7 +186,7 @@ def template_request(url, verb='GET', extraHeaders={}, validate_API=False, data=
     logging.debug('Peticion %s a url "%s" con cabeceras %s y datos %s',
                   verb, url, finalHeaders, data)
     req = client.request(verb, url,
-                         headers=finalHeaders, data=data)
+                         headers=finalHeaders, data=data, verify=False)
 
     try:
         myresp = req.json()
@@ -224,6 +228,7 @@ def do_process(op):
     template_request(
         "https://www.tramita.gva.es/ctt-att-atr/asistente/irAPaso.html",
         verb='POST',
+        verify=False,
         data='id=' + op,
         validate_API=True,
         extraHeaders={
@@ -237,6 +242,7 @@ def do_process(op):
     formTicket = template_request(
         "https://www.tramita.gva.es/ctt-att-atr/asistente/capturar/abrirFormulario.html",
         verb='POST',
+        verify=False,
         data='idPaso='+op+'&id=' + op,
         validate_API=True,
         extraHeaders={
@@ -250,6 +256,7 @@ def do_process(op):
     template_request(
         "https://www.tramita.gva.es/ctt-att-atr/asistente/fm/cargarFormulario.html",
         verb='POST',
+        verify=False,
         data='idPaso='+op+'&id='+op+'&ticket=' +
         formTicket.json()['datos']['ticket'],
         validate_API=True,
@@ -264,6 +271,7 @@ def do_process(op):
     return template_request(
         "https://www.tramita.gva.es/ctt-att-atr/asistente/fm/cargarPagina.html",
         verb='POST',
+        verify=False,
         data='idPaso='+op+'&id='+op+'&pagina=1',
         validate_API=True,
         extraHeaders={
@@ -305,6 +313,7 @@ def regenearte_captcha():
     template_request(
         "https://www.tramita.gva.es/ctt-att-atr/asistente/fm/regenerarCaptcha.html",
         verb='POST',
+        verify=False,
         validate_API=True,
         data='id=captcha',
         extraHeaders={
