@@ -1,1 +1,1 @@
-python cita_gva.py -d y8497997v -n Thiago -a1 Carvalho -a2 Machado -f 17/04/1982 -o cita.pdf -p València/Valencia -m Valencia -s JURAMENTO
+python cita_gva.py -d "nie" -n "name" -a1 "firstname" -a2 "lastname" -f "date of birth dd/mm/yyyy" -o cita.pdf -p "València/Valencia" -m "Valencia" -s "JURAMENTO"
